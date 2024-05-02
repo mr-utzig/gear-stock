@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{block "title" .}}Gear Stock{{end}}</title>
+    <script src="/lib/htmx.min.js"></script>
+    <script src="/lib/tailwind.min.js"></script>
+</head>
+
+<body>
+    <h1 class="text-3xl font-bold underline">BASE</h1>
+    {{block "content" .}}
+    <h2 class="text-3xl font-bold underline">DEFAULT</h2>
+    {{end}}
+</body>
+
+</html>
