@@ -29,6 +29,7 @@ func (s *Server) Start() {
 	e.Use(middleware.Recover())
 
 	// Users
+
 	// Customers
 	// Orders
 	orderModel := models.NewOrderModel(s.db)
