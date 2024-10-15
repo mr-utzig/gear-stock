@@ -1,0 +1,52 @@
+{{define "snackbar"}}
+<div hx-swap-oob="true" id="snackbar"
+    class=" fixed right-0 top-0 m-4 flex w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-md dark:bg-gray-800">
+    <div id="snackbar-icon" class="flex items-center justify-center w-12">
+    </div>
+    <div class="px-4 py-2 -mx-3">
+        <div class="mx-3">
+            <span id="snackbar-title" class="font-semibold"></span>
+            <p id="snackbar-message" class="text-sm text-gray-600 dark:text-gray-200"></p>
+        </div>
+    </div>
+</div>
+<script>
+    document.body.addEventListener("htmx:beforeSwap", function (e) {
+        if (e.detail.target.id != "snackbar-message") return;
+
+        e.detail.shouldSwap = true;
+
+        const snackbar = document.getElementById("snackbar")
+        const title = document.getElementById("snackbar-title")
+        const icon = document.getElementById("snackbar-icon")
+
+        const status = e.detail.xhr.status;
+        if (status >= 500) {
+            title.innerText = "Erro"
+            title.classList.add("text-red-500", "dark:text-red-400")
+            icon.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-lg"></i>'
+            icon.classList.add("bg-red-500")
+        } else if (status >= 300) {
+            title.innerText = "Atenção"
+            title.classList.add("text-yellow-400", "dark:text-yellow-300")
+            icon.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-lg"></i>'
+            icon.classList.add("bg-yellow-400")
+        } else if (status >= 200) {
+            title.innerText = "Sucesso"
+            title.classList.add("text-emerald-500", "dark:text-emerald-400")
+            icon.innerHTML = '<i class="fa-solid fa-circle-check fa-lg"></i>'
+            icon.classList.add("bg-emerald-500")
+        } else {
+            title.innerText = "Info."
+            title.classList.add("text-blue-500", "dark:text-blue-400")
+            icon.innerHTML = '<i class="fa-solid fa-circle-exclamation fa-lg"></i>'
+            icon.classList.add("bg-blue-500")
+        }
+
+        snackbar.classList.add('show')
+        setTimeout(function () {
+            snackbar.classList.remove('show')
+        }, 3000)
+    })
+</script>
+{{end}}

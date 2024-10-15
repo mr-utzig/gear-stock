@@ -1,0 +1,13 @@
+/* Show the snackbar */
+#snackbar.show {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Hide the snackbar */
+#snackbar {
+    /* visibility: hidden; */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
