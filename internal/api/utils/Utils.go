@@ -1,11 +1,11 @@
 package utils
 
 type response struct {
-	status  bool
-	message string
-	data    interface{}
+	Status  bool        `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
-func NewResponse(status bool, message string, data interface{}) response {
-	return response{status: status, message: message, data: data}
+func NewResponse(status bool, message string, data interface{}) *response {
+	return &response{Status: status, Message: message, Data: data}
 }

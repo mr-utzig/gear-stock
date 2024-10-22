@@ -1,2 +1,2 @@
 dev:
-	go build -o ./tmp/main ./cmd/main.go
+	go build -o ./temp/main ./cmd/main.go

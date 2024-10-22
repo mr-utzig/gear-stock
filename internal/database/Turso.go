@@ -9,9 +9,11 @@ import (
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-func NewTursoConn() *sql.DB {
-	tursoUrl := os.Getenv("TURSO_DB_URL")
-	tursoToken := os.Getenv("TURSO_DB_TOKEN")
+var Turso *sql.DB
+
+func NewTursoConn() {
+	tursoUrl := os.Getenv("TURSO_DATABASE_URL")
+	tursoToken := os.Getenv("TURSO_AUTH_TOKEN")
 	url := fmt.Sprintf("%s?authToken=%s", tursoUrl, tursoToken)
 
 	db, err := sql.Open("libsql", url)
@@ -19,5 +21,5 @@ func NewTursoConn() *sql.DB {
 		log.Fatal("Failed to open connection\n", err)
 	}
 
-	return db
+	Turso = db
 }

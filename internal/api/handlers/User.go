@@ -24,8 +24,21 @@ func (o *UserHandler) GetAllUsers(c echo.Context) error {
 
 // Create User:
 func (o *UserHandler) CreateUser(c echo.Context) error {
-	response := utils.NewResponse(true, "OK", o.model.CreateUser())
-	return c.JSON(http.StatusOK, response)
+	data := new(models.PostUser)
+	if err := c.Bind(data); err != nil {
+		c.Logger().Error("c.Bind(data)", err)
+
+		return c.JSON(http.StatusBadRequest, utils.NewResponse(false, "Bad Request", data))
+	}
+
+	user, err := o.model.CreateUser(data)
+	if err != nil {
+		c.Logger().Error("o.model.CreateUser", err)
+
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", data))
+	}
+
+	return c.JSON(http.StatusCreated, utils.NewResponse(true, "Created", user))
 }
 
 // Get User:

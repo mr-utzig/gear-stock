@@ -3,9 +3,13 @@ package routers
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/mr-utzig/gear-stock/internal/api/handlers"
+	"github.com/mr-utzig/gear-stock/internal/api/models"
 )
 
-func User(e *echo.Echo, handler *handlers.UserHandler) {
+func User(e *echo.Echo) {
+	model := models.NewUserModel()
+	handler := handlers.NewUserHandler(model)
+
 	users := e.Group("/users")
 
 	// Get all Users:

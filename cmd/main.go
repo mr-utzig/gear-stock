@@ -18,10 +18,10 @@ func main() {
 		log.Fatal("Error loading .env file", err)
 	}
 
-	db := database.NewTursoConn()
-	defer db.Close()
+	database.NewTursoConn()
+	defer database.Turso.Close()
 
-	server := api.NewServer(*port, db)
+	server := api.NewServer(*port)
 
 	server.Start()
 }
