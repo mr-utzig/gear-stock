@@ -24,16 +24,16 @@ func (o *UserHandler) GetAllUsers(c echo.Context) error {
 
 // Create User:
 func (o *UserHandler) CreateUser(c echo.Context) error {
-	data := new(models.PostUser)
+	data := new(models.CreateUserRequest)
 	if err := c.Bind(data); err != nil {
-		c.Logger().Error("c.Bind(data)", err)
+		c.Logger().Error("c.Bind(data)", &data, err)
 
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(false, "Bad Request", data))
 	}
 
 	user, err := o.model.CreateUser(data)
 	if err != nil {
-		c.Logger().Error("o.model.CreateUser", err)
+		c.Logger().Error("o.model.CreateUser(data)", &data, err)
 
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", data))
 	}

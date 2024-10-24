@@ -1,7 +1,11 @@
 package models
 
 import (
+	"fmt"
+
+	"github.com/mr-utzig/gear-stock/internal/api/utils"
 	"github.com/mr-utzig/gear-stock/internal/database"
+	"github.com/sethvargo/go-password/password"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,11 +18,10 @@ type User struct {
 	Status    bool   `json:"status"`
 }
 
-type PostUser struct {
+type CreateUserRequest struct {
 	ProfileID int    `json:"profile_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
-	Password  string `json:"password"`
 }
 
 type UserModel struct{}
@@ -31,8 +34,13 @@ func (o *UserModel) GetAllUsers() *[]User {
 	return &[]User{}
 }
 
-func (o *UserModel) CreateUser(data *PostUser) (*User, error) {
-	password, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+func (o *UserModel) CreateUser(data *CreateUserRequest) (*User, error) {
+	randpassword, err := password.Generate(12, 4, 4, false, true)
+	if err != nil {
+		return nil, err
+	}
+
+	hashpassword, err := bcrypt.GenerateFromPassword([]byte(randpassword), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +51,7 @@ func (o *UserModel) CreateUser(data *PostUser) (*User, error) {
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(data.Name, data.Email, string(password), data.ProfileID)
+	result, err := stmt.Exec(data.Name, data.Email, string(hashpassword), data.ProfileID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +66,11 @@ func (o *UserModel) CreateUser(data *PostUser) (*User, error) {
 		ProfileID: data.ProfileID,
 		Name:      data.Name,
 		Email:     data.Email,
-		Password:  data.Password,
+		Password:  string(hashpassword),
 		Status:    true,
 	}
+
+	utils.SendMail(data.Email, "Credentials Created", fmt.Sprintf("Email: %v\nPassword: %v", data.Email, randpassword))
 
 	return user, nil
 }
