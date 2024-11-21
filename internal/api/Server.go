@@ -22,6 +22,8 @@ func (s *Server) Start() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	// Auth
+	// routers.Auth(e)
 	// Users
 	routers.User(e)
 	// Customers

@@ -17,7 +17,7 @@ func User(e *echo.Echo) {
 	// Create User:
 	users.POST("", handler.CreateUser)
 	// Get User:
-	users.GET(":id", handler.GetUser)
+	users.GET("/:id", handler.GetUser)
 	// Update User:
-	users.PUT(":id", handler.UpdateUser)
+	users.PUT("/:id", handler.UpdateUser)
 }
