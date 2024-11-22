@@ -109,10 +109,10 @@ func (o *UserModel) CreateUser(data *CreateUserRequest) (*User, error) {
 	return user, nil
 }
 
-func (o *UserModel) GetUser(id int) (*UserDataResponse, error) {
-	user := &UserDataResponse{}
-	row := database.Turso.QueryRow("SELECT user_id, name, email, status, profile_id FROM user WHERE user_id = ?", id)
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Status, &user.ProfileID)
+func (o *UserModel) GetUser(id int) (*User, error) {
+	user := &User{}
+	row := database.Turso.QueryRow("SELECT user_id, name, email, password, status, profile_id, session_token, first_access FROM user WHERE user_id = ?", id)
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.ProfileID, &user.SessionToken, &user.FirstAccess)
 	if err != nil {
 		return nil, err
 	}
@@ -120,18 +120,17 @@ func (o *UserModel) GetUser(id int) (*UserDataResponse, error) {
 	return user, nil
 }
 
-func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*UserDataResponse, error) {
+func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*User, error) {
 	stmt, err := database.Turso.Prepare("UPDATE user SET name = ?, email = ?, status = ?, profile_id = ? WHERE user_id = ?")
 	if err != nil {
 		return nil, err
 	}
 	defer stmt.Close()
 
-	exec, err := stmt.Exec(data.Name, data.Email, data.Status, data.ProfileID, id)
+	_, err = stmt.Exec(data.Name, data.Email, data.Status, data.ProfileID, id)
 	if err != nil {
 		return nil, err
 	}
-	exec.RowsAffected()
 
 	user, err := o.GetUser(id)
 	if err != nil {
@@ -139,4 +138,39 @@ func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*UserDataRespon
 	}
 
 	return user, nil
+}
+
+func (o *UserModel) UpdatePassword(id int, password string) error {
+	hashpassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	stmt, err := database.Turso.Prepare("UPDATE user SET password = ? WHERE user_id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(string(hashpassword), id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UserModel) UpdateSessionToken(id int, token string) error {
+	stmt, err := database.Turso.Prepare("UPDATE user SET session_token = ?, first_access = 0 WHERE user_id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(token, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

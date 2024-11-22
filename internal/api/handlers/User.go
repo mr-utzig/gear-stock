@@ -67,7 +67,15 @@ func (u *UserHandler) GetUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", user))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", user))
+	userData := models.UserDataResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Status:    user.Status,
+		ProfileID: user.ProfileID,
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", userData))
 }
 
 // Update User:
@@ -87,5 +95,13 @@ func (u *UserHandler) UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", data))
 	}
 
-	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", user))
+	userData := models.UserDataResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Status:    user.Status,
+		ProfileID: user.ProfileID,
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", userData))
 }
