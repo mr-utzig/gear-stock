@@ -36,7 +36,7 @@ func (u *UserHandler) GetAllUsers(c echo.Context) error {
 
 // Create User:
 func (u *UserHandler) CreateUser(c echo.Context) error {
-	data := new(models.CreateUserRequest)
+	data := new(models.UserCreateRequest)
 	if err := c.Bind(data); err != nil {
 		c.Logger().Error("c.Bind(data)", &data, err)
 
@@ -80,7 +80,7 @@ func (u *UserHandler) GetUser(c echo.Context) error {
 
 // Update User:
 func (u *UserHandler) UpdateUser(c echo.Context) error {
-	data := new(models.UpdateUserRequest)
+	data := new(models.UserUpdateRequest)
 	if err := c.Bind(data); err != nil {
 		c.Logger().Error("c.Bind(data)", &data, err)
 

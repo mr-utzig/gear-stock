@@ -15,7 +15,7 @@ type User struct {
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	Password     string `json:"password"`
-	SessionToken string
+	SessionToken *string
 	Status       bool `json:"status"`
 	FirstAccess  bool
 }
@@ -28,13 +28,18 @@ type UserDataResponse struct {
 	Status    bool   `json:"status"`
 }
 
-type CreateUserRequest struct {
+type UserCreateRequest struct {
 	ProfileID int    `json:"profile_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 }
 
-type UpdateUserRequest struct {
+type UserLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserUpdateRequest struct {
 	ProfileID int    `json:"profile_id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
@@ -44,10 +49,10 @@ type UpdateUserRequest struct {
 type UserModel struct{}
 
 func NewUserModel() *UserModel {
-	return &UserModel{}
+	return new(UserModel)
 }
 
-func (o *UserModel) GetAllUsers() ([]UserDataResponse, error) {
+func (u *UserModel) GetAllUsers() ([]UserDataResponse, error) {
 	rows, err := database.Turso.Query("SELECT user_id, name, email, status, profile_id FROM user")
 	if err != nil {
 		return nil, err
@@ -68,7 +73,7 @@ func (o *UserModel) GetAllUsers() ([]UserDataResponse, error) {
 	return users, nil
 }
 
-func (o *UserModel) CreateUser(data *CreateUserRequest) (*User, error) {
+func (u *UserModel) CreateUser(data *UserCreateRequest) (*User, error) {
 	randpassword, err := password.Generate(12, 4, 4, false, true)
 	if err != nil {
 		return nil, err
@@ -109,10 +114,30 @@ func (o *UserModel) CreateUser(data *CreateUserRequest) (*User, error) {
 	return user, nil
 }
 
-func (o *UserModel) GetUser(id int) (*User, error) {
-	user := &User{}
-	row := database.Turso.QueryRow("SELECT user_id, name, email, password, status, profile_id, session_token, first_access FROM user WHERE user_id = ?", id)
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Status, &user.ProfileID, &user.SessionToken, &user.FirstAccess)
+func (u *UserModel) ValidateCredentials(data *UserLoginRequest) (*User, error) {
+	user := new(User)
+
+	err := database.Turso.QueryRow(
+		`SELECT user_id, name, email, password, status, profile_id, session_token, first_access
+		FROM user
+		WHERE email=?`,
+		data.Email,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Status,
+		&user.ProfileID,
+		&user.SessionToken,
+		&user.FirstAccess,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 	if err != nil {
 		return nil, err
 	}
@@ -120,8 +145,33 @@ func (o *UserModel) GetUser(id int) (*User, error) {
 	return user, nil
 }
 
-func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*User, error) {
-	stmt, err := database.Turso.Prepare("UPDATE user SET name = ?, email = ?, status = ?, profile_id = ? WHERE user_id = ?")
+func (u *UserModel) GetUser(id int) (*User, error) {
+	user := new(User)
+	err := database.Turso.QueryRow(
+		`SELECT user_id, name, email, password, status, profile_id, session_token, first_access
+		FROM user
+		WHERE user_id=?`,
+		id,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Status,
+		&user.ProfileID,
+		&user.SessionToken,
+		&user.FirstAccess,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (u *UserModel) UpdateUser(id int, data *UserUpdateRequest) (*User, error) {
+	stmt, err := database.Turso.Prepare("UPDATE user SET name=?, email=?, status=?, profile_id=? WHERE user_id=?")
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +182,7 @@ func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*User, error) {
 		return nil, err
 	}
 
-	user, err := o.GetUser(id)
+	user, err := u.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
@@ -140,13 +190,13 @@ func (o *UserModel) UpdateUser(id int, data *UpdateUserRequest) (*User, error) {
 	return user, nil
 }
 
-func (o *UserModel) UpdatePassword(id int, password string) error {
+func (u *UserModel) UpdatePassword(id int, password string) error {
 	hashpassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	stmt, err := database.Turso.Prepare("UPDATE user SET password = ? WHERE user_id = ?")
+	stmt, err := database.Turso.Prepare("UPDATE user SET password=? WHERE user_id=?")
 	if err != nil {
 		return err
 	}
@@ -160,8 +210,8 @@ func (o *UserModel) UpdatePassword(id int, password string) error {
 	return nil
 }
 
-func (o *UserModel) UpdateSessionToken(id int, token string) error {
-	stmt, err := database.Turso.Prepare("UPDATE user SET session_token = ?, first_access = 0 WHERE user_id = ?")
+func (u *UserModel) UpdateSessionToken(id int64, token *string) error {
+	stmt, err := database.Turso.Prepare("UPDATE user SET session_token=?, first_access=0 WHERE user_id=?")
 	if err != nil {
 		return err
 	}

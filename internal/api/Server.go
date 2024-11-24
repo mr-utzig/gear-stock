@@ -19,11 +19,16 @@ func NewServer(port string) *Server {
 func (s *Server) Start() {
 	e := echo.New()
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	e.Use(
+		middleware.Secure(),
+		middleware.Recover(),
+		middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: "method=${method}, path=${path}, status=${status} err=${error}\n",
+		}),
+	)
 
 	// Auth
-	// routers.Auth(e)
+	routers.Auth(e)
 	// Users
 	routers.User(e)
 	// Customers
