@@ -22,11 +22,10 @@ func NewUserHandler(model *models.UserModel) *UserHandler {
 func (u *UserHandler) GetAllUsers(c echo.Context) error {
 	users, err := u.model.GetAllUsers()
 	if err != nil {
-		c.Logger().Error("u.model.GetAllUsers()", err)
-
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound, utils.NewResponse(false, "Not Found", users))
 		}
+		c.Logger().Error("u.model.GetAllUsers()", err)
 
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", users))
 	}
@@ -58,11 +57,10 @@ func (u *UserHandler) GetUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	user, err := u.model.GetUser(id)
 	if err != nil {
-		c.Logger().Error("u.model.GetUser(id)", id, c.Param("id"), err)
-
 		if err == sql.ErrNoRows {
 			return c.JSON(http.StatusNotFound, utils.NewResponse(false, "Not Found", user))
 		}
+		c.Logger().Error("u.model.GetUser(id)", id, c.Param("id"), err)
 
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", user))
 	}

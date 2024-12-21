@@ -32,6 +32,7 @@ func (s *Server) Start() {
 	// Users
 	routers.User(e)
 	// Customers
+	routers.Customer(e)
 	// Orders
 	// Gears
 
