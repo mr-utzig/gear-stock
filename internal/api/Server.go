@@ -34,6 +34,7 @@ func (s *Server) Start() {
 	// Customers
 	routers.Customer(e)
 	// Orders
+	routers.Order(e)
 	// Gears
 
 	e.Logger.Fatal(e.Start(s.port))
