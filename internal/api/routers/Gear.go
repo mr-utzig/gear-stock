@@ -3,9 +3,13 @@ package routers
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/mr-utzig/gear-stock/internal/api/handlers"
+	"github.com/mr-utzig/gear-stock/internal/api/models"
 )
 
-func Gear(e *echo.Echo, handler *handlers.GearHandler) {
+func Gear(e *echo.Echo) {
+	model := models.NewGearModel()
+	handler := handlers.NewGearHandler(model)
+
 	gears := e.Group("/gears")
 
 	// get all gears
@@ -13,9 +17,9 @@ func Gear(e *echo.Echo, handler *handlers.GearHandler) {
 	// create gear
 	gears.POST("", handler.CreateGear)
 	// get gear
-	gears.GET(":id", handler.GetGear)
+	gears.GET("/:id", handler.GetGear)
 	// update gear
-	gears.PUT(":id", handler.UpdateGear)
+	gears.PUT("/:id", handler.UpdateGear)
 	// delete gear
-	gears.DELETE(":id", handler.DeleteGear)
+	gears.DELETE("/:id", handler.DeleteGear)
 }

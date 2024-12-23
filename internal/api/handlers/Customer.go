@@ -42,14 +42,14 @@ func (ct *CustomerHandler) CreateCustomer(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, utils.NewResponse(false, "Bad Request", data))
 	}
 
-	user, err := ct.model.CreateCustomer(data)
+	customer, err := ct.model.CreateCustomer(data)
 	if err != nil {
 		c.Logger().Error("ct.model.CreateCustomer(data)", &data, err)
 
 		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", data))
 	}
 
-	return c.JSON(http.StatusCreated, utils.NewResponse(true, "Created", user))
+	return c.JSON(http.StatusCreated, utils.NewResponse(true, "Created", customer))
 }
 
 // Get Customer:
