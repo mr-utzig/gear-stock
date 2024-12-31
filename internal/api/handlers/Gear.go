@@ -100,3 +100,19 @@ func (g *GearHandler) DeleteGear(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", gear))
 }
+
+// Get Gear:
+func (g *GearHandler) GetGearsByOrderID(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	gears, err := g.model.GetGearsByOrderID(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(http.StatusNotFound, utils.NewResponse(false, "Not Found", gears))
+		}
+		c.Logger().Error("g.model.GetGear(id)", id, c.Param("id"), err)
+
+		return c.JSON(http.StatusInternalServerError, utils.NewResponse(false, "Internal Server Error", gears))
+	}
+
+	return c.JSON(http.StatusOK, utils.NewResponse(true, "OK", gears))
+}

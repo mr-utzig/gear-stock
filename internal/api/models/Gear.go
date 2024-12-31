@@ -136,3 +136,24 @@ func (g *GearModel) DeleteGear(id int) (*int, error) {
 
 	return &id, nil
 }
+
+func (g *GearModel) GetGearsByOrderID(id int) ([]Gear, error) {
+	rows, err := database.Turso.Query("SELECT gear_id, order_id, name, description, status FROM gear WHERE order_id=?", id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	gears := []Gear{}
+	for rows.Next() {
+		gear := Gear{}
+		err := rows.Scan(&gear.ID, &gear.OrderID, &gear.Name, &gear.Description, &gear.Status)
+		if err != nil {
+			return nil, err
+		}
+
+		gears = append(gears, gear)
+	}
+
+	return gears, nil
+}

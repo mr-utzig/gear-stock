@@ -22,4 +22,6 @@ func Gear(e *echo.Echo) {
 	gears.PUT("/:id", handler.UpdateGear)
 	// delete gear
 	gears.DELETE("/:id", handler.DeleteGear)
+	// get gears by order id
+	gears.GET("/order/:id", handler.GetGearsByOrderID)
 }
